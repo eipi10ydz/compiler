@@ -162,9 +162,9 @@ at              [@]
     \\n     { check_length("\n"); }
     \\f     { check_length("\f"); }
 
-    "\\"+\n { check_length(yytext + 1); ++curr_lineno; }
+    \\\n { check_length(yytext + 1); ++curr_lineno; }
 
-    "\\"+[^\0] { check_length(yytext + 1); }
+    \\(.) { check_length(yytext + 1); }
 
     "\\" { check_length("\\"); }
 
@@ -196,7 +196,7 @@ at              [@]
     \n  { ++curr_lineno; }
 
     [^*\n(]
-    "("+[^*]
+    "("[^*]
     "*"+[^)]
 }
 
