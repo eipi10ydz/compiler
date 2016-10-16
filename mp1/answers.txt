@@ -1,3 +1,4 @@
+MP1.1
 (1) 这个list和C++ STL的list有哪些不同？
 
 1. 这个list只有节点的定义，而STL里面的list不仅有节点的定义，还有list本身的定义。原因大概是这里的list实现与Lisp之流差不多，把节点也看做表，list的实现中head返回的是list中第一个元素，tail返回的是除第一个元素后所有元素组成的list。
@@ -20,3 +21,81 @@ cool-tour.pdf里面说了尽量简化，不考虑内存管理、尽量不重载�
 1. 用于按类型(标识符、字面值常量、字符串常量)管理代码中出现的字符串，便于按不同类型生成不同代码
 
 2. 同一种类的String Table中相同字符串只出现一次，避免相同字符串重复申请空间，便于管理，在一定程度上弥补了不考虑内存管理带来的一些问题。。。
+
+
+MP1.3
+做实验过程中遇到的问题
+1. let语句行号与reference-binaries里面的行号不同
+结果发现在没有赋初始值的情况下才会行号不同。原来的写法如下所示(为节约篇幅省去大部分表达式):
+
+let_list
+        :   IN expr
+            { $$ = $2; }
+        |   ',' OBJECTID ':' TYPEID ASSIGN expr let_list
+            { $$ = let($2, $4, $6, $7); }
+        |   ',' OBJECTID ':' TYPEID let_list
+            { $$ = let($2, $4, no_expr(), $5); }
+        ;
+
+expr    :   LET OBJECTID ':' TYPEID ASSIGN expr let_list
+            { $$ = let($2, $4, $6, $7); }
+        |   LET OBJECTID ':' TYPEID let_list
+            { $$ = let($2, $4, no_expr(), $5); }
+        ;
+
+可见这时如果没有赋值，会导致let行号不一致。
+原因应该在于如果没有赋值，不会在该处规约，导致行号为let结束时的行号。
+因此可以修改文法，使文法满足两种情形均规约即可。
+为了方便，把两种情况统一为assign_list。
+
+assign_list
+        :
+            { $$ = no_expr(); }
+        |   ASSIGN expr
+            { $$ = $2; }
+
+let_list
+        :   IN expr
+            { $$ = $2; }
+        |   ',' OBJECTID ':' TYPEID assign_list let_list
+            { $$ = let($2, $4, $5, $6); }
+        ;
+
+expr    |   LET OBJECTID ':' TYPEID assign_list let_list
+            { $$ = let($2, $4, $5, $6); };
+
+修改后即可实现行号与reference-binaries一致。
+
+2.let语句具有二义性，为了消除冲突，给IN加入优先级
+
+3.dispatch的多种形式需要不重不漏的考虑
+(1)没有对象要补上self
+(2)参数列表可能为空
+
+其中bison_test_good.cl依次检查以下东西
+1.空类
+2.继承
+3.两条let语句进行运算
+4.运算符结合性及优先级
+5.赋值语句
+6.赋值语句结合性
+7.加减乘除结合性
+8.实现atoi的类，里面包含嵌套if then else fi, while loop pool等
+9.多分支case
+10.一个属性的方法
+11.一个属性的类
+12.多个属性的类
+13.比较运算符
+14.复数类，里面包含let, if then else fi, ~, 等
+15.方法调用(多参数, 参数为空, 单参数)
+16.if
+17.嵌套if
+18.let(参数带赋值, 参数不带赋值, 带括号的几种情形)
+19.方法调用(检查调用父类方法的情况)
+20.多属性类
+21.方法调用(需要补上self)
+22.嵌套语句块
+23.嵌套let
+24.没有参数的@调用
+25.一元运算符
+26.while循环
