@@ -178,7 +178,7 @@ at              [@]
 }
 
 <comments>{
-    "*)"  {
+    "*"+")"  {
         if (--layers == 0)
         {
             BEGIN(INITIAL);
@@ -194,10 +194,12 @@ at              [@]
     }
 
     \n  { ++curr_lineno; }
-
-    [^*\n(]
-    "("[^*]
-    "*"+[^)]
+    
+    [^*\n]
+    "("[^*\n]
+    "*"+[^)\n]
+    "*"+\n  { ++curr_lineno; }
+    "("\n  { ++curr_lineno; }
 }
 
 "*)"                { cool_yylval.error_msg = "Unmatched *)"; return ERROR; }
@@ -241,9 +243,9 @@ at              [@]
 {of}                { return OF; }
 {not}               { return NOT; }
 {true}              { cool_yylval.boolean = 1; return BOOL_CONST; }
-{type_id}           { cool_yylval.symbol = idtable.add_string(yytext, MAX_STR_CONST - 1); return TYPEID; }
-{obj_id}            { cool_yylval.symbol = idtable.add_string(yytext, MAX_STR_CONST - 1); return OBJECTID; }
-{digit}             { cool_yylval.symbol = inttable.add_string(yytext, MAX_STR_CONST - 1); return INT_CONST; }
+{type_id}           { cool_yylval.symbol = idtable.add_string(yytext); return TYPEID; }
+{obj_id}            { cool_yylval.symbol = idtable.add_string(yytext); return OBJECTID; }
+{digit}             { cool_yylval.symbol = inttable.add_string(yytext); return INT_CONST; }
 .                   { cool_yylval.error_msg = yytext; return ERROR; }
 
 %%
