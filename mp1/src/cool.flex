@@ -164,7 +164,7 @@ at              [@]
 
     \\\n { check_length(yytext + 1); ++curr_lineno; }
 
-    \\(.) { check_length(yytext + 1); }
+    \\[^\0] { check_length(yytext + 1); }
 
     "\\" { check_length("\\"); }
 
