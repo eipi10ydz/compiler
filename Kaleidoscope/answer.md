@@ -69,9 +69,9 @@
              	└── FnName
 |
 └── HandleTopLevelExpression
-          ├── FunctionAST
-          ├── AnonymousADT(空的ArgNames与FnName)
-          └── ExprAST
+          └─── FunctionAST
+               ├── ExprAST
+               └── AnonymousADT(空的ArgNames与FnName)
 </pre>
 - &nbsp;```Kaleidoscope```如何在```Lexer```和```Parser```间传递信息?(token、语义值、用什么函数和变量)
 	- token: 用```CurTok```来表示当前的token，用```getNextToken```获取下一个token，```getNextToken```里面调用了```Lexer```的```gettok```

@@ -108,9 +108,9 @@ Base
            └── FnName
 |
 └── HandleTopLevelExpression
-    ├── FunctionAST
-    ├── AnonymousADT(空的ArgNames与FnName)
-    └── ExprAST
+    └─── FunctionAST
+         ├── ExprAST
+         └── AnonymousADT(空的ArgNames与FnName)
 </pre></li></ul>
 </li><li>&nbsp;<code>Kaleidoscope</code>如何在<code>Lexer</code>和<code>Parser</code>间传递信息?(token、语义值、用什么函数和变量)<ul>
 <li>token: 用<code>CurTok</code>来表示当前的token，用<code>getNextToken</code>获取下一个token，<code>getNextToken</code>里面调用了<code>Lexer</code>的<code>gettok</code></li><li>语义值: 全局变量IdentifierStr用来保存变量名，NumVal用来保存数字值<pre class="cpp hljs"><code class="cpp" data-origin="<pre><code class=&quot;cpp&quot;>static std::string IdentifierStr;  // Filled in if tok_identifier
