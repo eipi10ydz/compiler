@@ -137,11 +137,27 @@ binop ::= '&lt;' | '+' | '-' | '*'
 <li>变量可以作为函数的形式参数</li></ul>
 </li></ul><h2 id="3"><a name="3" href="#3"></a>3</h2><ul>
 <li>解释教程3.2节中<code>Module</code>、<code>IRBuilder&lt;&gt;</code>的作用<ul>
-<li><code>Module</code>包含函数和全局变量，是<code>LLVM</code>的结构组分。这也是<code>LLVM IR</code>用来存放代码的顶层结构，它负责<code>IR</code>的内存，因此<code>codegen</code>返回的是<code>Value*</code>，而不是<code>unique_ptr</code></li><li><code>IRBuilder&lt;&gt;</code>是模板类，它提供了统一的接口用于创建指令并把它们插入一个基本语句块，或者是在基本语句块的末尾，或者是在迭代器指向的特定位置</li></ul>
+<li><code>Module</code>包含函数和全局变量，是<code>LLVM</code>的结构组分。这也是<code>LLVM IR</code>用来存放代码的顶层结构，它负责<code>IR</code>的内存，因此<code>codegen</code>返回的是<code>Value*</code>，而不是<code>unique_ptr</code></li><li><code>IRBuilder&lt;&gt;</code>是模板类，它提供了统一的接口用于创建指令并把它们插入一个基本语句块，或者是插在基本语句块的末尾，或者是插在迭代器指向的特定位置</li></ul>
 </li><li>为何使用常量时用的函数名都是<code>get</code>而不是<code>create</code>?<ul>
 <li>因为在<code>LLVM IR</code>中，常量都是共享的，且每个常量仅有一个</li></ul>
-</li><li>简要说明声明和定义一个函数的过程<br>  - </li><li>文中提到了visitor pattern,虽然这里没有用到,但是是一个很重要的设计模式,请调研后给出解释(字数不作限制)<ul>
-<li></li></ul>
+</li><li><p>简要说明声明和定义一个函数的过程</p>
+<ul>
+<li>声明函数<ul>
+<li><code>PrototypeAST::codegen()</code>生成一个原型，返回函数指针(没有函数体，只有原型在LLVM IR中表示的就是函数声明)</li><li>利用<code>FunctionType::get</code>获取原型的类型，它是接受一组double作为参数并返回double且不是变长参数的类型。这一类型供下面<code>Function::Create</code>使用</li><li>利用<code>Function::Create</code>生成对应原型的IR函数指针，可以指定是否在模块外可用，此指针为返回的结果</li><li>(可选)根据原型提供的名字给函数的每个参数设置名字，名字不变可以提高IR可读性，让后续代码直接根据名字指定参数</li></ul>
+</li><li>定义函数<ul>
+<li><code>FunctionAST::codegen()</code>生成一个函数，并返回该函数的指针。</li><li>首先需要检查，比如说这个函数在之前是否被定义过，或者说存在一个extern的外部函数。检查可以通过符号表查找来实现。</li><li>然后就要为函数创建、插入所谓<code>Basic Block</code>。当函数中不存在控制流时，仅需要一个<code>Basic Block</code>。根据维基的说法，在<code>Basic Block</code>中是不存在分支的。因此如果存在控制流，就需要多个<code>Basic Block</code>。</li><li>插入<code>Basic Block</code>后，就可以将函数的参数都加到<code>NamedValues</code>字典(map)中，以便之后访问(生成变量表达式时)。</li><li>接着调用<code>codegen()</code>。从函数的抽象语法树根节点开始生成IR代码。<ul>
+<li>如果有错误，那么该方法会创建返回空指针，将会调用<code>eraseFromParent</code>方法将函数删去，并返回<code>nullptr</code>。</li><li>如果没有错误，接下来调用<code>Builder.CreateRet</code>完成函数的返回部分，即<code>LLVM ret instruction</code>，用于把控制流返回给调用者。下一步<code>verifyFunction</code>函数会测试生成的函数的IR代码的正确性，确认正确后，才会返回由原型调用<code>Codegen()</code>生成的函数体的指针</li></ul>
+</li></ul>
+</li></ul>
+</li><li><p>文中提到了visitor pattern,虽然这里没有用到,但是是一个很重要的设计模式,请调研后给出解释(字数不作限制)</p>
+<ul>
+<li>可以看到，原来版本中，visitor方法分散到被访问对象的继承体系中，一旦需要增加访问方式，就必须修改被访问对象的继承体系以加入新的访问方法<br>  <img src="ori.png" alt=""></li><li>在使用visitor之后，把访问操作从被访问对象的继承体系分离出来，并实现visitor的继承体系。原来的访问操作变为accept方法中的<code>v -&gt; VisitInheritNode(this)</code><br>  <img src="obj.png" alt=""><br>  <img src="visitor.png" alt=""></li><li>优点<ul>
+<li>不需要改动被访问对象，增加新的访问方式只需要扩充visitor的继承体系，即增加visitor，易于增加新的访问方式。</li><li>把访问操作与其它无关操作分离开</li></ul>
+</li><li>缺点<ul>
+<li>由于方便visitor访问，可能需要把一些东西向visitor公开(比如把visitor设置为友元)，破坏封装</li><li>如果需要经常扩充被访问对象的继承体系，需要经常把所有visitor更新，此时不太适宜使用visitor模式</li></ul>
+</li><li>适用条件<ul>
+<li>被访问对象继承体系变动不大，不需要经常增加新的被访问对象，但需要经常增加新的访问操作</li><li>需要对对象继承体系中的对象进行一些访问操作，但和对象继承体系关系不大，需要把这些访问操作分离出来</li></ul>
+</li></ul>
 </li></ul><h1 id="参考资料"><a name="参考资料" href="#参考资料"></a>参考资料</h1><ol>
 <li>Lippman S B, 侯捷. 深度探索 C++ 对象模型[J]. M]. 北京: 华中科技大学出版社, 2001.</li><li>Gamma E, Helm R, Johnson R, et al. 设计模式: 可复用面向对象软件的基础[J]. 2000.</li></ol>
 
