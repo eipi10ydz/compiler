@@ -333,8 +333,6 @@ assign_list
             { $$ = no_expr(); }
         |   ASSIGN expr
             { $$ = $2; }
-        |   error
-            { yyerrok; }
         ;
 
 let_list
@@ -342,6 +340,14 @@ let_list
             { $$ = $2; }
         |   ',' OBJECTID ':' TYPEID assign_list let_list
             { $$ = let($2, $4, $5, $6); }
+        |   ',' OBJECTID ':' TYPEID error let_list
+            { yyerrok; }
+        |   ',' OBJECTID ':' error let_list
+            { yyerrok; }
+        |   ',' OBJECTID error let_list
+            { yyerrok; }
+        |   ',' error let_list
+            { yyerrok; }
         ;
 
 case    :   OBJECTID ':' TYPEID DARROW expr ';'
@@ -421,6 +427,8 @@ expr    :   OBJECTID ASSIGN expr
             { $$ = bool_const($1); }
         |   LET OBJECTID ':' TYPEID assign_list let_list
             { $$ = let($2, $4, $5, $6); }
+        |   LET OBJECTID ':' TYPEID assign_list error
+            { yyerrok; }
         |   CASE expr OF case_list ESAC
             { $$ = typcase($2, $4); }
         |   error

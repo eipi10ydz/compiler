@@ -152,4 +152,5 @@ class a {};
 (1)formal_list, assign_list, case直接加了error
 (2)expr加了error，所以在para_list, let_list等就直接不管了
 (3)expr就额外处理了if结构和while结构
+(4)let如果不处理就会把错误重复报很多次，因此需要加入处理，比如没有in会疯狂报错，所以就加入处理in错误等问题
 4. 测试例全部放在bison_test_bad?.cl中
