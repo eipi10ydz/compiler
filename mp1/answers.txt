@@ -99,3 +99,57 @@ expr    |   LET OBJECTID ':' TYPEID assign_list let_list
 24.没有参数的@调用
 25.一元运算符
 26.while循环
+
+MP1.3 第二次提交(错误处理)
+1. class 的检查
+(1)只在其它部分齐全的情况下考虑class外少分号的情况
+class : CLASS TYPEID '{' feature_list '}' error
+        { yyerrok; }
+像下面这种情况
+class a {};
+A {};
+class a {};
+如果写成
+a:
+class : CLASS error ';'
+        { yyerrork; }
+就能同时检查出这三行都有错
+但如果写成
+b:
+class : CLASS error
+        { yyerrork; }
+中间一行就会被吃掉，只报第一和第三行错。
+但也不是说这样就完美了。像下面这种情况
+class a <- {}
+class a {};
+如果写成a，就会一直吃到第二行最后的分号，导致第二行的class其实有错但没有报
+(2)因此，在其它部分错误的情况下默认吃到下一个分号，比如类似下面这种处理方式
+class : CLASS TYPEID error ';'
+        { yyerrok; }
+所以可能会有遗漏或者导致错误，如
+class A <- {
+	var : Int <- 0;
+	set_var(var : Int) : SELF_TYPE {
+		let x : Int <- 0 in
+			let y : Int <- 0 in
+				10
+	};
+};
+会在第三行莫名其妙地报set_var错，实际上就是吃到了第二行末尾的分号
+(3)处理没写class的情况。虽然说其实我觉得如果真想写一个class还忘了写class关键字真心不可能，倒可能是错在其它地方了。。。但后来还是加进来了
+(4)处理不止一个错误的情况，像下面的cool代码
+class a {};
+B {}
+class a {};
+就可以报出第二行的缺了class和分号(虽然会报到第三行的class，因为要读到下一个才知道是缺少分号，是error)
+(5)然后其实有两个错误就有可能有三个错误。。。但是我不打算考虑这个，毕竟我也没必要一次把所有都标出来，每一次都改一波错就好了
+2. feature的处理类似class，分别是
+(1)只在其它部分齐全的情况下考虑少分号的情况
+(2)在其它部分错误的情况下默认吃到下一个分号
+(3)考虑没写OBJECTID的情况
+(4)处理不止一个错误的情况
+3. 其它的结构简单，就算直接报error也应该问题不大，所以处理起来较为简略。
+(1)formal_list, assign_list, case直接加了error
+(2)expr加了error，所以在para_list, let_list等就直接不管了
+(3)expr就额外处理了if结构和while结构
+4. 测试例全部放在bison_test_bad?.cl中

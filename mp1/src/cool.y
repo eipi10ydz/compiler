@@ -141,6 +141,51 @@ class   :   CLASS TYPEID '{' feature_list '}' ';'
                               stringtable.add_string(curr_filename)); }
         |   CLASS TYPEID INHERITS TYPEID '{' feature_list '}' ';'
             { $$ = class_($2, $4, $6, stringtable.add_string(curr_filename)); }
+        /* error with class */
+        |   CLASS error ';'
+            { yyerrok; }
+        |   CLASS TYPEID error ';'
+            { yyerrok; }
+        |   CLASS TYPEID '{' feature_list error ';'
+            { yyerrok; }
+        |   CLASS TYPEID '{' feature_list '}' error
+            { yyerrok; }
+        |   CLASS TYPEID INHERITS error ';'
+            { yyerrok; }
+        |   CLASS TYPEID INHERITS TYPEID error ';'
+            { yyerrok; }
+        |   CLASS TYPEID INHERITS TYPEID '{'feature_list error ';'
+            { yyerrok; }
+        |   CLASS TYPEID INHERITS TYPEID '{' feature_list '}' error
+            { yyerrok; }
+        /* error: forget class... */
+        |   error feature_list '}' ';'
+            { }
+        |   error '{' feature_list '}' ';'
+            { }
+        |   error TYPEID '{' feature_list '}' ';'
+            { }
+        |   error INHERITS TYPEID '{' feature_list '}' ';'
+            { }
+        |   error TYPEID INHERITS TYPEID '{' feature_list '}' ';'
+            { }
+        |   error ';'
+            { yyerrok; }
+        /* error: forget class, but also error behind */
+        |   error TYPEID error ';'
+            { yyerrok; }
+        |   error TYPEID '{' feature_list error ';'
+            { yyerrok; }
+        |   error TYPEID '{' feature_list '}' error
+            { yyerrok; }
+        |   error TYPEID INHERITS error ';'
+            { yyerrok; }
+        |   error TYPEID INHERITS TYPEID error ';'
+            { yyerrok; }
+        |   error TYPEID INHERITS TYPEID '{' feature_list error ';'
+            { yyerrok; }
+        |   error TYPEID INHERITS TYPEID '{' feature_list '}' error
+            { yyerrok; }
         ;
 
 /* Feature list may be empty, but no empty features in list. */
@@ -157,6 +202,101 @@ feature :   OBJECTID '(' formal_list ')' ':' TYPEID '{' expr '}' ';'
             { $$ = attr($1, $3, no_expr()); }
         |   OBJECTID ':' TYPEID ASSIGN expr ';'
             { $$ = attr($1, $3, $5); }
+        /* error with object id */
+        |   OBJECTID '(' formal_list error ';'
+            { yyerrok; }
+        |   OBJECTID '(' formal_list ')' error ';'
+            { yyerrok; }
+        |   OBJECTID '(' formal_list ')' ':' error ';'
+            { yyerrok; }
+        |   OBJECTID '(' formal_list ')' ':' TYPEID error ';'
+            { yyerrok; }
+        |   OBJECTID '(' formal_list ')' ':' TYPEID '{' error ';'
+            { yyerrok; }
+        |   OBJECTID '(' formal_list ')' ':' TYPEID '{' expr error ';'
+            { yyerrok; }
+        |   OBJECTID '(' formal_list ')' ':' TYPEID '{' expr '}' error
+            { yyerrok; }
+        |   OBJECTID error ';'
+            { yyerrok; }
+        |   OBJECTID ':' error ';'
+            { yyerrok; }
+        |   OBJECTID ':' TYPEID error
+            { yyerrok; }
+        /*|   OBJECTID ':' TYPEID ASSIGN error ';'
+            { yyerrok; }*/
+        |   OBJECTID ':' TYPEID ASSIGN expr error
+            { yyerrok; }
+        /* error without object id */
+        |   error '(' formal_list ')' ':' TYPEID '{' expr '}' ';'
+            { }
+        |   error formal_list ')' ':' TYPEID '{' expr '}' ';'
+            { }
+        |   error ':' TYPEID '{' expr '}' ';'
+            { }
+        |   error TYPEID '{' expr '}' ';'
+            { }
+        |   error '{' expr '}' ';'
+            { }
+        |   error expr '}' ';'
+            { }
+        |   error '}' ';'
+            { }
+        |   error ':' TYPEID ';'
+            { }
+        |   error TYPEID ';'
+            { }
+        |   error ':' TYPEID ASSIGN expr ';'
+            { }
+        |   error TYPEID ASSIGN expr ';'
+            { }
+        |   error ASSIGN expr ';'
+            { }
+        |   error expr ';'
+            { }
+        /* error without object id, and still error behind */
+        |   error ':' error
+            { yyerrok; }
+        |   error TYPEID error
+            { yyerrok; }
+        |   error ':' TYPEID error 
+            { yyerrok; }
+        |   error ':' TYPEID ASSIGN expr error
+            { yyerrok; }
+        /*|   error ':' TYPEID ASSIGN error
+            { yyerrok; }*/
+        |   error TYPEID ASSIGN expr error
+            { yyerrok; }
+        |   error ASSIGN expr error
+            { yyerrok; }
+        |   error expr error
+            { yyerrok; }
+        |   error '(' formal_list ')' ':' TYPEID '{' expr '}' error
+            { yyerrok; }
+        |   error '(' formal_list ')' ':' TYPEID '{' expr error
+            { yyerrok; }
+        /*|   error '(' formal_list ')' ':' TYPEID '{' error
+            { yyerrok; }*/
+        |   error '(' formal_list ')' ':' TYPEID error
+            { yyerrok; }
+        |   error '(' formal_list ')' ':' error
+            { yyerrok; }
+        |   error '(' formal_list ')' error
+            { yyerrok; }
+        /*|   error '(' formal_list error
+            { yyerrok; }*/
+        |   error formal_list ')' ':' TYPEID '{' expr '}' error
+            { yyerrok; }
+        |   error ':' TYPEID '{' expr '}' error
+            { yyerrok; }
+        |   error TYPEID '{' expr '}' error
+            { yyerrok; }
+        |   error '{' expr '}' error
+            { yyerrok; }
+        |   error expr '}' error
+            { yyerrok; }
+        |   error '}' error
+            { yyerrok; }
         ;
 
 formal_list
@@ -166,6 +306,8 @@ formal_list
             { $$ = single_Formals($1); }
         |   formal_list ',' formal
             { $$ = append_Formals($1, single_Formals($3)); }
+        |   formal_list ',' error
+            { yyerrok; }
         ;
 
 formal  :   OBJECTID ':' TYPEID
@@ -191,6 +333,9 @@ assign_list
             { $$ = no_expr(); }
         |   ASSIGN expr
             { $$ = $2; }
+        |   error
+            { yyerrok; }
+        ;
 
 let_list
         :   IN expr
@@ -201,6 +346,8 @@ let_list
 
 case    :   OBJECTID ':' TYPEID DARROW expr ';'
             { $$ = branch($1, $3, $5); }
+        |   error ';'
+            { yyerrok; }
         ;
 
 case_list
@@ -226,8 +373,18 @@ expr    :   OBJECTID ASSIGN expr
             { $$ = dispatch(object(idtable.add_string("self")), $1, nil_Expressions()); }
         |   IF expr THEN expr ELSE expr FI
             { $$ = cond($2, $4, $6); }
+        |   IF expr error expr ELSE expr FI
+            { yyerrok; }
+        |   IF expr THEN expr error expr FI
+            { yyerrok; }
+        |   IF expr THEN expr ELSE expr error
+            { yyerrok; }
         |   WHILE expr LOOP expr POOL
             { $$ = loop($2, $4); }
+        |   WHILE expr error expr POOL
+            { yyerrok; }
+        |   WHILE expr LOOP expr error
+            { yyerrok; }
         |   '{' expr_list '}'
             { $$ = block($2); }
         |   NEW TYPEID
@@ -266,6 +423,8 @@ expr    :   OBJECTID ASSIGN expr
             { $$ = let($2, $4, $5, $6); }
         |   CASE expr OF case_list ESAC
             { $$ = typcase($2, $4); }
+        |   error
+            { }
         ;
 
 /* end of grammar */
