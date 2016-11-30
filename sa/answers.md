@@ -1,5 +1,5 @@
 ### 3.1
-`bash
+```bash
 # 绘制ast图
 clang -cc1 -ast-view test.c
 dot -Tsvg /tmp/AST*.dot -o AST.svg
@@ -9,7 +9,7 @@ dot -Tsvg /tmp/CFG*.dot -o CFG.svg
 # 绘制exploded graph图
 clang -cc1 -analyze -analyzer-checker=debug.ViewExplodedGraph test.c
 dot -Tsvg /tmp/Expr*.dot -o ExplodedGraph.svg
-`
+```
 
 ### 3.2
 1. Checker 对于程序的分析主要在 AST 上还是在 CFG 上进行?
@@ -56,7 +56,7 @@ dot -Tsvg /tmp/Expr*.dot -o ExplodedGraph.svg
    + `checkPointerEscape`中若检测到文件描述符变得无法追踪，则会清除对应的无法追踪的符号
 
 3. 在哪些地方有对状态的检查？
-   + `checkDeadSymbols`中检查
+   + `checkDeadSymbols`中得到追踪的流符号，逐个检查是否变为`dead symbol`
    + `isLeaked`中检查是否文件被打开后变为`dead symbol`
    + `CheckPreCall`中会检测`Call`对应的文件描述符是否被重复关闭
 
