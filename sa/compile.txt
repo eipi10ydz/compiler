@@ -1,0 +1,9 @@
+CPU: Intel(R) Xeon(R) CPU E5-2695 v4 @ 2.10GHz
+内存大小: 126GB
+操作系统: CentOS Linux 7 (Core)
+cmake目标: make
+cmake build type: Debug
+编译线程数: 16
+编译耗时: 见sa/mem.png，为编译时内存-时间曲线
+内存占用峰值: 见sa/mem.png，为编译时内存-时间曲线
+遇到的问题及如何解决: 开线程数太多会爆内存，因此开少线程数可以编译成功
