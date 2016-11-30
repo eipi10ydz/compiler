@@ -67,10 +67,42 @@ dot -Tsvg /tmp/Expr*.dot -o ExplodedGraph.svg
    + 功能
       + 清除无法追踪(escaped)的符号，因为再也无法知道它的状态
    + 用在什么地方
-      + 
+      + 用于处理出现无法追踪的符号的情况
       
 5. 根据以上认识,你认为这个简单的checker能够识别出怎样的bug？又有哪些局限性？请给出测试程序及相关的说明。
-   + 
+   + 可以识别的情况
+      - 文件未被关闭的bug
+      ```c
+      #include <stdio.h>
+      int main()
+      {
+            FILE *fp;
+            fp =fopen("csa.md", "r");
+      }
+      ```
+      - 文件被多次关闭的bug
+      ```c
+      #include <stdio.h>
+      int main()
+      {
+            FILE *fp;
+            fp =fopen("csa.md", "r");
+            fclose(fp);
+            fclose(fp);
+      }
+      ```
+   + 局限性: 如下面的程序，就无法检查出fp未被关闭
+      ```c
+            #include <stdio.h>
+            int main()
+            {
+                  FILE *fp;
+                  fp =fopen("csa.md", "r");
+                  for(int i = 0; i < 4; ++i)
+                      if (i > 10)
+                          fclose(fp);
+            }
+      ```
 
 ### 3.5
 1. 增加一个checker需要增加哪些文件?需要对哪些文件进行修改？
