@@ -8,12 +8,39 @@ class Main {
         not false;
         let c : Int, d : Int in
             let a : Int <- 3, b : Int <- 5 in
+        {
+            a + c;
+            let c : Bool in
+                23333;
+            while 0 < a loop
             {
-                a + c;
-                let c : Bool in
-                    23333;
-                a + d *c -b / a;
-            };
+                if 1 <= b then
+                {
+                    if 1 = b then
+                    {
+                        if 1 = b then
+                            c = d
+                        else
+                            d = b
+                        fi;
+                        c <= d;
+                        c = d;
+                    }
+                    else
+                    {
+                        d = b;
+                        d <= a;
+                    }
+                    fi;
+                    c <= d;
+                }
+                else
+                    d = b
+                fi;
+                a <- a - 1;
+            }
+            pool;
+        };
         if 1 < 2 then
             {
                 if 2 < 3 then
@@ -43,9 +70,9 @@ class Main {
             66666
         pool;
         2333 + 6666;
-        while 1 < 2 loop
-        while 1 < 2 loop
-        while 1 < 2 loop
+        while 11 < 2 loop
+        while 11 < 2 loop
+        while 11 < 2 loop
         if 1 < 2 then
             {
                 if 2 < 3 then

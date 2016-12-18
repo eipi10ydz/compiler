@@ -938,10 +938,11 @@ operand cond_class::code(CgenEnvironment *env)
 	env->vp.alloca_mem(out, type, tmp);
 	env->vp.branch_cond(pred->code(env), True, False);
 	env->vp.begin_block(True);
-	operand Then = then_exp->code(env), Else = else_exp->code(env);
+	operand Then = then_exp->code(env);
 	env->vp.store(Then, tmp);
 	env->vp.branch_uncond(End);
 	env->vp.begin_block(False);
+	operand Else = else_exp->code(env);
 	env->vp.store(Else, tmp);
 	env->vp.branch_uncond(End);
 	env->vp.begin_block(End);
@@ -1116,9 +1117,9 @@ operand lt_class::code(CgenEnvironment *env)
 	// MORE MEANINGFUL
 	std::ostream &out = *(env->cur_stream);
 	op_type i1_type(INT1);
-	operand tmp(i1_type, env->new_name());
+	operand tmp;
 	//void ValuePrinter::icmp(ostream &o, icmp_val v, operand op1, operand op2, operand result) 
-	env->vp.icmp(out, LT, e1->code(env), e2->code(env), tmp);
+	env->vp.icmp(out, LT, e1->code(env), e2->code(env), tmp = operand(i1_type, env->new_name()));
 	return tmp;
 }
 
@@ -1129,9 +1130,9 @@ operand eq_class::code(CgenEnvironment *env)
 	// MORE MEANINGFUL
 	std::ostream &out = *(env->cur_stream);
 	op_type i1_type(INT1);
-	operand tmp(i1_type, env->new_name());
-	//void ValuePrinter::icmp(ostream &o, icmp_val v, operand op1, operand op2, operand result) 
-	env->vp.icmp(out, EQ, e1->code(env), e2->code(env), tmp);
+	operand tmp;
+	//void ValuePrinter::icmp(ostream &o, icmp_val v, operand op1, operand op2, operand result)
+	env->vp.icmp(out, EQ, e1->code(env), e2->code(env), tmp = operand(i1_type, env->new_name()));
 	return tmp;
 }
 
@@ -1142,9 +1143,9 @@ operand leq_class::code(CgenEnvironment *env)
 	// MORE MEANINGFUL
 	std::ostream &out = *(env->cur_stream);
 	op_type i1_type(INT1);
-	operand tmp(i1_type, env->new_name());
+	operand tmp;
 	//void ValuePrinter::icmp(ostream &o, icmp_val v, operand op1, operand op2, operand result) 
-	env->vp.icmp(out, LE, e1->code(env), e2->code(env), tmp);
+	env->vp.icmp(out, LE, e1->code(env), e2->code(env), tmp = operand(i1_type, env->new_name()));
 	return tmp;
 }
 
